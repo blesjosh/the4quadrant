@@ -83,25 +83,31 @@ function KanbanBoard({ initialTasks }: KanbanBoardProps) {
       console.log("Submitting task with data:", taskData);
       
       // This calls your backend to create the task in Supabase
-      const newTask = await createTask(taskData);
+      const result = await createTask(taskData);
       
-      console.log("Task creation result:", newTask);
+      console.log("Task creation result:", result);
+
+      if (result && 'error' in result) {
+        console.error("Failed to create task:", result.error);
+        alert(`Failed to create task: ${result.error}`);
+        return; // Stop execution
+      }
       
       // Close the creation modal
       setIsCreateModalOpen(false);
       
       // Add the new task to state
-      setTasks(prev => [...prev, newTask as Task]);
-      
-      // Open allocation modal for the new task
-      if (newTask) {
-        setTaskToAllocateId(newTask.id);
+      if (result) {
+        setTasks(prev => [...prev, result as Task]);
+        
+        // Open allocation modal for the new task
+        setTaskToAllocateId(result.id);
         setIsAllocateModalOpen(true);
       }
     } catch (error) {
-      console.error("Failed to create task:", error);
+      console.error("An unexpected error occurred:", error);
       // Show an error message to the user
-      alert("Failed to create task. Please try again.");
+      alert("An unexpected error occurred while creating the task. Please try again.");
     }
   };
 

@@ -74,7 +74,7 @@ export async function createTask(taskData: TaskData) {
     return data; // Return the new task data
   } catch (error: any) {
     console.error("Task creation failed:", error);
-    throw error; // Rethrow the error to be handled by the client
+    return { error: error.message }; // Return an error object
   }
 }
 
