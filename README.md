@@ -1,8 +1,54 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# The 4 Quadrant
+
+A productivity application based on Stephen Covey's Time Management Matrix from "The 7 Habits of Highly Effective People."
+
+![Overview of The 4 Quadrant application](overview.gif)
+
+## About
+
+The 4 Quadrant helps you prioritize your tasks according to the principles outlined in Stephen Covey's "The 7 Habits of Highly Effective People." The application divides tasks into four quadrants based on their urgency and importance:
+
+![How to use the application](howtouse.png)
+
+- **Quadrant I**: Urgent & Important (Do It!)
+- **Quadrant II**: Not Urgent & Important (Plan It!)
+- **Quadrant III**: Urgent & Not Important (Avoid It!)
+- **Quadrant IV**: Not Urgent & Not Important (Delete It!)
+
+![Dashboard view of the application](dashboard.png)
+
+## Key Features
+
+- Create and organize tasks in the four quadrants
+- Drag and drop tasks between quadrants to reprioritize
+- Mark tasks as complete
+- Review completed tasks to analyze productivity patterns
+- Intuitive, clean user interface
 
 ## Getting Started
 
-First, run the development server:
+First, clone the repository:
+
+```bash
+git clone https://github.com/yourusername/the4quadrant.git
+cd the4quadrant
+```
+
+Install dependencies:
+
+```bash
+npm install
+# or
+yarn install
+# or
+pnpm install
+# or
+bun install
+```
+
+Create a `.env.local` file with your environment variables (if needed).
+
+Run the development server:
 
 ```bash
 npm run dev
@@ -16,22 +62,37 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Technologies Used
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- [Next.js](https://nextjs.org/) - React framework
+- [Tailwind CSS](https://tailwindcss.com/) - Styling
+- [Supabase](https://supabase.com/) - Backend and database
 
-## Learn More
+## How to Contribute
 
-To learn more about Next.js, take a look at the following resources:
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Deployment
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+This application can be easily deployed on [Vercel](https://vercel.com/):
 
-## Deploy on Vercel
+```bash
+npm run build
+# or
+yarn build
+# or
+pnpm build
+# or
+bun build
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+For more details, check out the [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-# the4quadrant
+## Credits
+
+- Created by [Blessing Joshua](https://github.com/blesjosh)
+- Inspired by Stephen Covey's "The 7 Habits of Highly Effective People"
