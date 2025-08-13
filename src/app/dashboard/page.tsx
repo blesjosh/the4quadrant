@@ -5,6 +5,7 @@ import KanbanBoard from "@/components/KanbanBoard";
 import { Instrument_Serif } from 'next/font/google';
 import { Task } from "@/types";
 import { UserButton, useAuth } from "@clerk/nextjs";
+import Link from 'next/link';
 import { useEffect, useState } from "react";
 
 const instrumentSerif = Instrument_Serif({
@@ -58,8 +59,11 @@ export default function DashboardPage() {
       <div className="relative z-10 flex flex-col min-h-screen">
         {/* Fixed Navbar */}
         <nav className="fixed top-4 left-1/2 transform -translate-x-1/2 flex items-center justify-between w-[95vw] max-w-6xl px-4 sm:px-6 py-3 border border-gray-300 rounded-full bg-white/80 backdrop-blur-sm shadow-lg" style={{ zIndex: 30 }}>
-          <span className={`${instrumentSerif.className} font-sans text-xl sm:text-2xl`}>the4Q</span>
-          <UserButton />
+          <Link href="/" className={`${instrumentSerif.className} font-sans text-xl sm:text-2xl hover:opacity-80 transition-opacity`}>the4Q</Link>
+          <div className="flex items-center gap-6">
+            <Link href="/dashboard/how-to-use" className="text-gray-700 hover:text-gray-900 font-medium">How to Use</Link>
+            <UserButton />
+          </div>
         </nav>
         {/* Main Content */}
         <main className="flex flex-col items-center justify-start pt-24 sm:pt-28 pb-8 w-full px-4">
