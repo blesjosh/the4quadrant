@@ -32,13 +32,6 @@ const instrumentSerif = Instrument_Serif({
 
 // 2. Accept the props
 function KanbanBoard({ initialTasks }: KanbanBoardProps) {
-  // Add hydration safety with isMounted pattern
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
   // 3. Use the prop to set the initial state, instead of hardcoded data
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
 
@@ -66,11 +59,6 @@ function KanbanBoard({ initialTasks }: KanbanBoardProps) {
       </div>
     );
   };
-
-  // Prevent hydration mismatch by not rendering until client-side
-  if (!isMounted) {
-    return null; // or a loading spinner
-  }
 
   // Updated: handleAddTask now uses the server action and opens allocation modal
   const handleAddTask = async (taskData: {
