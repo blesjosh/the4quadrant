@@ -32,8 +32,13 @@ const instrumentSerif = Instrument_Serif({
 
 // 2. Accept the props
 function KanbanBoard({ initialTasks }: KanbanBoardProps) {
-  // 3. Use the prop to set the initial state, instead of hardcoded data
+  // 3. Use the prop to set the initial state, and update when props change
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
+  
+  // Update tasks when initialTasks prop changes (e.g., when authentication completes)
+  useEffect(() => {
+    setTasks(initialTasks);
+  }, [initialTasks]);
 
   // State for the main creation modal
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);

@@ -1,19 +1,47 @@
+"use client";
+
 import { fetchTasks } from "@/app/actions/taskActions";
 import KanbanBoard from "@/components/KanbanBoard";
-import {Instrument_Serif } from 'next/font/google';
+import { Instrument_Serif } from 'next/font/google';
 import { Task } from "@/types";
-import { UserButton } from "@clerk/nextjs";
+import { UserButton, useAuth } from "@clerk/nextjs";
+import { useEffect, useState } from "react";
 
- const instrumentSerif = Instrument_Serif({
+const instrumentSerif = Instrument_Serif({
   subsets: ['latin'],
   weight: ['400'],
-  style: ['italic'], // Ensure normal style for consistency
+  style: ['italic'],
 });
 
-export default async function DashboardPage() {
-  const tasks: Task[] = await fetchTasks();
+export default function DashboardPage() {
+  const { isLoaded, userId } = useAuth();
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
- 
+  useEffect(() => {
+    async function loadTasks() {
+      // Only fetch tasks when Clerk auth is loaded and we have a userId
+      if (isLoaded && userId) {
+        setIsLoading(true);
+        try {
+          const fetchedTasks = await fetchTasks();
+          console.log("Fetched tasks:", fetchedTasks);
+          setTasks(fetchedTasks);
+        } catch (error) {
+          console.error("Error fetching tasks:", error);
+        } finally {
+          setIsLoading(false);
+        }
+      } else if (isLoaded && !userId) {
+        // User is not authenticated
+        setIsLoading(false);
+        setTasks([]);
+      }
+      // If not loaded yet, keep isLoading true
+    }
+
+    loadTasks();
+  }, [isLoaded, userId]);
 
   return (
     <div className="min-h-screen w-full bg-white relative font-serif">
@@ -35,7 +63,14 @@ export default async function DashboardPage() {
         </nav>
         {/* Main Content */}
         <main className="flex flex-col items-center justify-start pt-24 sm:pt-28 pb-8 w-full px-4">
-          <KanbanBoard initialTasks={tasks} />
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900"></div>
+              <p className="mt-4 text-gray-600">Loading your tasks...</p>
+            </div>
+          ) : (
+            <KanbanBoard initialTasks={tasks} />
+          )}
           <footer className="mt-12 text-center text-base sm:text-lg text-gray-700 font-serif">
             Made by <span className={`${instrumentSerif.className} italic font-semibold`}>Blessing Joshua</span>
           </footer>

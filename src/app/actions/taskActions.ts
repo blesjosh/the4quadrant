@@ -12,21 +12,37 @@ interface TaskData {
 }
 
 export async function fetchTasks() {
-  const { userId } = await auth();
-  if (!userId) {
-    return [];
+  try {
+    console.log("Fetching tasks...");
+    
+    // Get the authenticated user ID from Clerk
+    const { userId } = await auth();
+    
+    // If there's no userId, the user isn't authenticated
+    if (!userId) {
+      console.log("No authenticated user found");
+      return [];
+    }
+    
+    console.log("Fetching tasks for user ID:", userId);
+
+    // Fetch tasks from Supabase
+    const { data, error } = await supabase
+      .from("tasks")
+      .select("*")
+      .eq("user_id", userId);
+
+    if (error) {
+      console.error("Supabase fetch error:", error.message);
+      throw new Error(`Failed to fetch tasks: ${error.message}`);
+    }
+
+    console.log(`Successfully fetched ${data?.length || 0} tasks for user ${userId}`);
+    return data || [];
+  } catch (error: any) {
+    console.error("Error in fetchTasks:", error.message);
+    return []; // Return an empty array on error
   }
-
-  const { data, error } = await supabase
-    .from("tasks")
-    .select("*")
-    .eq("user_id", userId);
-
-  if (error) {
-    console.error("Supabase fetch error:", error.message);
-  }
-
-  return data || [];
 }
 
 export async function createTask(taskData: TaskData) {
