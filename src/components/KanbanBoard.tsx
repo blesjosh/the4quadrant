@@ -114,7 +114,10 @@ function KanbanBoard({ initialTasks }: KanbanBoardProps) {
   };
 
   // Mark a task as completed with optimistic update
-  const handleCompleteTask = (currentStatus: string, taskId: number) => {
+  const handleCompleteTask = async (currentStatus: string, taskId: number) => {
+    // Keep a copy of the original tasks state to restore if there's an error
+    const originalTasks = [...tasks];
+    
     // 1. Optimistic Update: Update the state locally right away
     setTasks(prevTasks =>
       prevTasks.map(task =>
@@ -123,14 +126,23 @@ function KanbanBoard({ initialTasks }: KanbanBoardProps) {
     );
 
     // 2. Backend Update: Call the server action
-    completeTask(taskId, currentStatus).catch((error) => {
-      console.error("Failed to complete task:", error);
+    const result = await completeTask(taskId, currentStatus);
+    
+    if (result && 'error' in result) {
+      console.error("Failed to complete task:", result.error);
       // Revert the UI change in case of error
-    });
+      setTasks(originalTasks);
+      alert(`Failed to complete task: ${result.error}`);
+    } else {
+      console.log("Task marked as completed successfully");
+    }
   };
 
   // Undo a completed task with optimistic update
-  const handleUndoTask = (previousStatus: string, taskId: number) => {
+  const handleUndoTask = async (previousStatus: string, taskId: number) => {
+    // Keep a copy of the original tasks state to restore if there's an error
+    const originalTasks = [...tasks];
+    
     // 1. Optimistic Update: Update the state locally right away
     setTasks(prevTasks =>
       prevTasks.map(task =>
@@ -139,22 +151,37 @@ function KanbanBoard({ initialTasks }: KanbanBoardProps) {
     );
 
     // 2. Backend Update: Call the server action
-    undoTask(taskId, previousStatus).catch((error) => {
-      console.error("Failed to undo task completion:", error);
+    const result = await undoTask(taskId, previousStatus);
+    
+    if (result && 'error' in result) {
+      console.error("Failed to undo task completion:", result.error);
       // Revert the UI change in case of error
-    });
+      setTasks(originalTasks);
+      alert(`Failed to undo task: ${result.error}`);
+    } else {
+      console.log("Task undone successfully");
+    }
   };
 
   // Delete a task with optimistic update
-  const handleDeleteTask = (taskId: number) => {
+  const handleDeleteTask = async (taskId: number) => {
+    // Keep a copy of the original tasks state to restore if there's an error
+    const originalTasks = [...tasks];
+    
     // 1. Optimistic Update: Remove from local state
     setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
 
     // 2. Backend Update: Call the server action
-    deleteTask(taskId).catch((error) => {
-      console.error("Failed to delete task:", error);
-      // In a real app, you might want to fetch all tasks again to restore state
-    });
+    const result = await deleteTask(taskId);
+    
+    if (result && 'error' in result) {
+      console.error("Failed to delete task:", result.error);
+      // Restore the original state
+      setTasks(originalTasks);
+      alert(`Failed to delete task: ${result.error}`);
+    } else {
+      console.log("Task deleted successfully");
+    }
   };
 
   // Drag and drop handler
@@ -177,18 +204,29 @@ function KanbanBoard({ initialTasks }: KanbanBoardProps) {
       return;
     }
 
+    // Optimistic UI update - update local state immediately
     setTasks((prevTasks) =>
       prevTasks.map((task) =>
         task.id === taskId ? { ...task, status: newStatus } : task
       )
     );
 
-    // 2. Backend Update: Send the change to the server in the background.
-    // We use .catch() because we don't need to wait (`await`) for it.
-    updateTaskStatus(taskId, newStatus).catch((error) => {
-      console.error("Failed to save drag-and-drop change:", error);
-      // In a real app, you might revert the UI change here.
-    });
+    // Backend Update: Send the change to the server
+    updateTaskStatus(taskId, newStatus)
+      .then(() => {
+        console.log(`Task ${taskId} status updated to ${newStatus} in database`);
+      })
+      .catch((error) => {
+        console.error("Failed to save drag-and-drop change:", error);
+        // Revert the UI change on error
+        setTasks((prevTasks) => 
+          prevTasks.map((task) => 
+            task.id === taskId ? { ...task, status: task.status } : task
+          )
+        );
+        // Show a user-friendly error message
+        alert("Failed to update task. Please try again.");
+      });
   };
 
   // Filters

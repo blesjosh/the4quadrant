@@ -82,69 +82,145 @@ export async function updateTaskStatus(
   taskId: number,
   newStatus: string
 ) {
-  const { userId } = await auth();
-  if (!userId) {
-    throw new Error("You must be logged in to update a task.");
+  try {
+    console.log(`Updating task ${taskId} to status ${newStatus}`);
+    
+    const { userId } = await auth();
+    if (!userId) {
+      console.error("Authentication failed: No user ID");
+      return { error: "You must be logged in to update a task." };
+    }
+
+    // Update the task in the 'tasks' table
+    const { data, error } = await supabase
+      .from("tasks")
+      .update({ status: newStatus })
+      .eq("id", taskId) // for the specific task
+      .eq("user_id", userId) // AND for the logged-in user (SECURITY)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Supabase Update Error:", error);
+      return { error: `Failed to update task status: ${error.message}` };
+    }
+    
+    console.log("Task updated successfully:", data);
+
+    // Refresh the data on the dashboard page
+    revalidatePath("/dashboard");
+    
+    // Return the updated task
+    return { success: true, data };
+  } catch (error: any) {
+    console.error("Task update failed:", error);
+    return { error: error.message };
   }
-
-  // Update the task in the 'tasks' table
-  const { error } = await supabase
-    .from("tasks")
-    .update({ status: newStatus })
-    .eq("id", taskId) // for the specific task
-    .eq("user_id", userId); // AND for the logged-in user (SECURITY)
-
-  if (error) {
-    console.error("Supabase Update Error:", error);
-    throw new Error("Failed to update task status.");
-  }
-
-  // Refresh the data on the dashboard page
-  revalidatePath("/dashboard");
 }
 
 export async function completeTask(taskId: number, currentStatus: string) {
-  const { userId } = await auth();
-  if (!userId) throw new Error("Not logged in");
+  try {
+    console.log(`Completing task ${taskId} (previous status: ${currentStatus})`);
+    
+    const { userId } = await auth();
+    if (!userId) {
+      console.error("Authentication failed: No user ID");
+      return { error: "You must be logged in to complete a task." };
+    }
 
-  const { error } = await supabase
-    .from("tasks")
-    .update({ 
-      status: 'completed', 
-      last_active_status: currentStatus // Save where the task came from
-    })
-    .eq("id", taskId)
-    .eq("user_id", userId);
+    const { data, error } = await supabase
+      .from("tasks")
+      .update({ 
+        status: 'completed', 
+        last_active_status: currentStatus // Save where the task came from
+      })
+      .eq("id", taskId)
+      .eq("user_id", userId)
+      .select()
+      .single();
 
-  if (error) throw new Error("Failed to complete task.");
-  revalidatePath("/dashboard");
+    if (error) {
+      console.error("Supabase Update Error:", error);
+      return { error: `Failed to complete task: ${error.message}` };
+    }
+
+    console.log("Task completed successfully:", data);
+    
+    // Refresh the data on the dashboard page
+    revalidatePath("/dashboard");
+    
+    return { success: true, data };
+  } catch (error: any) {
+    console.error("Task completion failed:", error);
+    return { error: error.message };
+  }
 }
 
 export async function undoTask(taskId: number, previousStatus: string) {
-  const { userId } = await auth();
-  if (!userId) throw new Error("Not logged in");
+  try {
+    console.log(`Undoing task ${taskId} to previous status: ${previousStatus}`);
+    
+    const { userId } = await auth();
+    if (!userId) {
+      console.error("Authentication failed: No user ID");
+      return { error: "You must be logged in to undo a task." };
+    }
 
-  // Move the task back to its last active status
-  const { error } = await supabase
-    .from("tasks")
-    .update({ status: previousStatus, last_active_status: null }) // Clear the last status
-    .eq("id", taskId)
-    .eq("user_id", userId);
+    // Move the task back to its last active status
+    const { data, error } = await supabase
+      .from("tasks")
+      .update({ status: previousStatus, last_active_status: null }) // Clear the last status
+      .eq("id", taskId)
+      .eq("user_id", userId)
+      .select()
+      .single();
 
-  if (error) throw new Error("Failed to undo task.");
-  revalidatePath("/dashboard");
+    if (error) {
+      console.error("Supabase Update Error:", error);
+      return { error: `Failed to undo task: ${error.message}` };
+    }
+
+    console.log("Task undone successfully:", data);
+    
+    // Refresh the data on the dashboard page
+    revalidatePath("/dashboard");
+    
+    return { success: true, data };
+  } catch (error: any) {
+    console.error("Task undo failed:", error);
+    return { error: error.message };
+  }
 }
 
 export async function deleteTask(taskId: number) {
-  const { userId } = await auth();
-  if (!userId) throw new Error("Not logged in");
+  try {
+    console.log(`Deleting task ${taskId}`);
+    
+    const { userId } = await auth();
+    if (!userId) {
+      console.error("Authentication failed: No user ID");
+      return { error: "You must be logged in to delete a task." };
+    }
 
-  const { error } = await supabase
-    .from("tasks")
-    .delete() // Delete the row
-    .eq("id", taskId)
-    .eq("user_id", userId); // Security check
+    const { error } = await supabase
+      .from("tasks")
+      .delete() // Delete the row
+      .eq("id", taskId)
+      .eq("user_id", userId); // Security check
 
-  if (error) throw new Error("Failed to delete task.");
-  revalidatePath("/dashboard");
+    if (error) {
+      console.error("Supabase Delete Error:", error);
+      return { error: `Failed to delete task: ${error.message}` };
+    }
+
+    console.log("Task deleted successfully");
+    
+    // Refresh the data on the dashboard page
+    revalidatePath("/dashboard");
+    
+    return { success: true };
+  } catch (error: any) {
+    console.error("Task deletion failed:", error);
+    return { error: error.message };
+  }
 }
